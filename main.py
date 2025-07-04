@@ -1,19 +1,23 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from utils.pdf_analyzer import analyze_pdf
+from utils.document_analyzer import analyze_doc
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ganti ke origin Laravel kamu
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.post("/analyze-pdf")
-async def analyze_pdf_endpoint(file: UploadFile = File(...)):
+@app.post("/analyze-document")
+async def analyze_document_endpoint(
+    file: UploadFile = File(...), 
+    color_threshold: float = 10.0,
+    photo_threshold: float = 50.0,
+):
     contents = await file.read()
-    result = analyze_pdf(contents)
+    result = analyze_doc(contents, color_threshold, photo_threshold)
     return result
