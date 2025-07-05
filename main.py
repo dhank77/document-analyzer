@@ -16,7 +16,7 @@ app.add_middleware(
 async def analyze_document_endpoint(
     file: UploadFile = File(...), 
     color_threshold: float = 10.0,
-    photo_threshold: float = 50.0,
+    photo_threshold: float = 30.0,
 ):
     contents = await file.read()
     result = analyze_doc(contents, color_threshold, photo_threshold)
