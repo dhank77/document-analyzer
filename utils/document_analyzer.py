@@ -4,15 +4,15 @@ import numpy as np
 from concurrent.futures import ProcessPoolExecutor
 import io
 
-def _analyze_page(page_bytes, page_num, color_threshold, photo_threshold):
-    """
-    Fungsi untuk dipanggil secara paralel per halaman.
-    """
-    pix = fitz.Pixmap(page_bytes)
-    img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
-    # Resize agar lebih cepat (25%)
-    img = img.resize((pix.width // 4, pix.height // 4))
+def _analyze_page(pix_bytes, size, page_num, color_threshold, photo_threshold):
+    """
+    Fungsi ini dijalankan di proses terpisah untuk tiap halaman.
+    `pix_bytes` adalah raw RGB byte.
+    `size` adalah (width, height).
+    """
+    img = Image.frombytes("RGB", size, pix_bytes)
+    img = img.resize((size[0] // 4, size[1] // 4))  # turunkan resolusi untuk kecepatan
 
     arr = np.array(img)
     r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
@@ -49,20 +49,16 @@ def analyze_doc(file_bytes, color_threshold=10.0, photo_threshold=50.0):
     """
     doc = fitz.open("pdf", file_bytes)
 
-    # Simpan pixmap tiap halaman sebagai bytes agar bisa dikirim ke proses lain
-    pages_pixmap = []
-    for page in doc:
-        pix = page.get_pixmap()
-        pix_bytes = pix.tobytes("ppm")  # convert ke PPM agar bisa di-reload
-        pages_pixmap.append(pix_bytes)
+    pages_data = []
+    for i, page in enumerate(doc):
+        pix = page.get_pixmap(matrix=fitz.Matrix(0.5, 0.5))  # perkecil 50%
+        pix_bytes = pix.samples
+        size = (pix.width, pix.height)
+        pages_data.append((pix_bytes, size, i + 1, color_threshold, photo_threshold))
 
     results = []
     with ProcessPoolExecutor() as executor:
-        futures = []
-        for idx, page_pix in enumerate(pages_pixmap):
-            futures.append(
-                executor.submit(_analyze_page, page_pix, idx + 1, color_threshold, photo_threshold)
-            )
+        futures = [executor.submit(_analyze_page, *args) for args in pages_data]
         for future in futures:
             results.append(future.result())
 
