@@ -1,8 +1,9 @@
 import fitz  # PyMuPDF
 from PIL import Image
 import numpy as np
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 import io
+import sys
 
 
 def _analyze_page(pix_bytes, size, page_num, color_threshold, photo_threshold):
@@ -57,7 +58,10 @@ def analyze_doc(file_bytes, color_threshold=10.0, photo_threshold=50.0):
         pages_data.append((pix_bytes, size, i + 1, color_threshold, photo_threshold))
 
     results = []
-    with ProcessPoolExecutor() as executor:
+    
+    # Gunakan ThreadPoolExecutor untuk kompatibilitas dengan PyInstaller
+    # ThreadPoolExecutor lebih aman daripada ProcessPoolExecutor untuk executable
+    with ThreadPoolExecutor(max_workers=4) as executor:
         futures = [executor.submit(_analyze_page, *args) for args in pages_data]
         for future in futures:
             results.append(future.result())
