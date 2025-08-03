@@ -37,23 +37,33 @@ def build_executable():
     # Nama executable
     exe_name = "pdf_analyzer"
     
-    # Command untuk PyInstaller
-    # Detect OS untuk separator yang tepat
-    import platform
-    separator = ";" if platform.system() == "Windows" else ":"
-    
-    cmd = [
-        "pyinstaller",
-        "--onefile",  # Single executable file
-        "--name", exe_name,
-        "--add-data", f"utils{separator}utils",  # Include utils folder
-        "--hidden-import", "fitz",
-        "--hidden-import", "PIL",
-        "--hidden-import", "numpy",
-        "--hidden-import", "concurrent.futures",
-        "--clean",
-        main_file
-    ]
+    # Check if spec file exists in root directory
+    spec_file = "../../pdf_analyzer.spec"
+    if os.path.exists(spec_file):
+        print(f"Using existing spec file: {spec_file}")
+        cmd = [
+            "pyinstaller",
+            "--clean",
+            spec_file
+        ]
+    else:
+        # Fallback to command line arguments
+        # Detect OS untuk separator yang tepat
+        import platform
+        separator = ";" if platform.system() == "Windows" else ":"
+        
+        cmd = [
+            "pyinstaller",
+            "--onefile",  # Single executable file
+            "--name", exe_name,
+            "--add-data", f"utils{separator}utils",  # Include utils folder
+            "--hidden-import", "fitz",
+            "--hidden-import", "PIL",
+            "--hidden-import", "numpy",
+            "--hidden-import", "concurrent.futures",
+            "--clean",
+            main_file
+        ]
     
     print("Building executable...")
     print(f"Command: {' '.join(cmd)}")
