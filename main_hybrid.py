@@ -67,15 +67,15 @@ def analyze_file_cli(file_path: str, color_threshold: float = 10.0, photo_thresh
     """Analyze file via command line interface"""
     try:
         if not os.path.exists(file_path):
-            print(f"❌ File tidak ditemukan: {file_path}")
+            print(f"File tidak ditemukan: {file_path}")
             return False
             
         with open(file_path, 'rb') as f:
             file_bytes = f.read()
             
-        print(f"🔍 Menganalisis: {file_path}")
-        print(f"📊 Threshold warna: {color_threshold}%")
-        print(f"📸 Threshold foto: {photo_threshold}%")
+        print(f"Menganalisis: {file_path}")
+        print(f"Threshold warna: {color_threshold}%")
+        print(f"Threshold foto: {photo_threshold}%")
         print("-" * 50)
         
         result = analyze_doc(file_bytes, color_threshold, photo_threshold)
@@ -84,18 +84,18 @@ def analyze_file_cli(file_path: str, color_threshold: float = 10.0, photo_thresh
             print(json.dumps(result, indent=2, ensure_ascii=False))
         else:
             # Format human-readable
-            print(f"📄 Total halaman: {result['total_pages']}")
-            print(f"🖤 Hitam putih: {result['bw_pages']} halaman")
-            print(f"🎨 Berwarna: {result['color_pages']} halaman") 
-            print(f"📸 Foto: {result['photo_pages']} halaman")
-            print(f"\n📋 Detail per halaman:")
+            print(f"Total halaman: {result['total_pages']}")
+            print(f"Hitam putih: {result['bw_pages']} halaman")
+            print(f"Berwarna: {result['color_pages']} halaman") 
+            print(f"Foto: {result['photo_pages']} halaman")
+            print(f"\nDetail per halaman:")
             for page in result['page_details']:
                 print(f"  Hal {page['halaman']}: {page['jenis']} ({page['persentase_warna']}%)")
                 
         return True
         
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f"Error: {str(e)}")
         return False
 
 def main():
@@ -116,9 +116,9 @@ def main():
     args = parser.parse_args()
     
     if args.mode == "server":
-        print("🚀 Starting PDF Analyzer Server...")
-        print(f"🌐 URL: http://{args.host}:{args.port}")
-        print(f"📖 Docs: http://{args.host}:{args.port}/docs")
+        print("Starting PDF Analyzer Server...")
+        print(f"URL: http://{args.host}:{args.port}")
+        print(f"Docs: http://{args.host}:{args.port}/docs")
         print("Press Ctrl+C to stop")
         
         uvicorn.run(
@@ -130,7 +130,7 @@ def main():
         
     elif args.mode == "cli":
         if not args.file:
-            print("❌ Mode CLI memerlukan parameter --file")
+            print("Mode CLI memerlukan parameter --file")
             parser.print_help()
             sys.exit(1)
             
@@ -146,9 +146,9 @@ def main():
 if __name__ == "__main__":
     # Jika dijalankan sebagai executable tanpa arguments, jalankan server
     if len(sys.argv) == 1 and getattr(sys, 'frozen', False):
-        print("🚀 PDF Analyzer Executable Mode")
-        print("🌐 Starting server at http://127.0.0.1:9006")
-        print("📖 API Docs: http://127.0.0.1:9006/docs")
+        print("PDF Analyzer Executable Mode")
+        print("Starting server at http://127.0.0.1:9006")
+        print("API Docs: http://127.0.0.1:9006/docs")
         print("Press Ctrl+C to stop")
         
         uvicorn.run(app, host="127.0.0.1", port=9006, log_level="info")
